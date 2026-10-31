@@ -226,7 +226,7 @@ Each phase ends in a merged PR and a working `cargo mok add` flow.
 - Reword README/site as CLI-first. Add a workflow file for CI if it is missing.
 - Done when: grep is clean, `check.sh` passes offline.
 
-**Phase 2: static registry and the smoke test.**
+**Phase 2: static registry and the smoke test.** (2a done: `cargo mok registry build <dir>` writes `index.json` + a sha256-checked `source.tar.gz`; `MOK_REGISTRY_URL=<dir url> cargo mok add …` fetches it instead of cloning. Still open: per-item `r/*.json`, hosting it on the site, the fresh-project compile CI job.)
 - `registry build` writes `index.json` + `r/*.json`; CLI reads from URL with sha256 check and `--from` for local.
 - Fresh-project CI job for each chapter (native + wasm32).
 - Done when: `cargo mok add button` in an empty project fetches over HTTPS and compiles.

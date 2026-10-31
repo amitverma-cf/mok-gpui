@@ -2,6 +2,7 @@ use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+mod bundle;
 mod component;
 mod deps;
 mod fetch;
@@ -30,6 +31,15 @@ fn main() {
         "add" => handle_add(&args[2..]),
         "update" => handle_update(&args[2..]),
         "doctor" | "check" => handle_doctor(),
+        "registry" if args.get(2).map(String::as_str) == Some("build") => {
+            let out = args
+                .get(3)
+                .map_or_else(|| PathBuf::from("dist/registry"), PathBuf::from);
+            if let Err(e) = bundle::build(Path::new("."), &out) {
+                eprintln!("[error] {e}");
+                std::process::exit(1);
+            }
+        }
         "registry" => {
             let check = args.iter().any(|a| a == "--check");
             let root = args
@@ -63,6 +73,9 @@ fn print_help() {
     println!("  add icons <pack>         Add an icon pack (lucide, heroicons, hugeicons)");
     println!("  add <component>          Copy a component and what it needs into src/ui");
     println!("  update [--dry-run]       Bring copied components up to date, keeping your edits");
+    println!(
+        "  registry build [dir]     Write index.json and source.tar.gz for hosting (maintainers)"
+    );
     println!("  doctor, check            Verify mok-gpui.toml contrast, fonts, and assets");
     println!("  help                     Show this help message\n");
     println!("Examples:");

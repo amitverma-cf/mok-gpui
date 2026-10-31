@@ -24,6 +24,9 @@ pub fn source_root(from: Option<&Path>) -> Result<PathBuf, String> {
     if here.join("registry.json").is_file() && here.join("src/lib.rs").is_file() {
         return Ok(here.to_path_buf());
     }
+    if let Ok(url) = std::env::var("MOK_REGISTRY_URL") {
+        return crate::bundle::fetch(&url);
+    }
     let url = std::env::var("MOK_SOURCE_URL").unwrap_or_else(|_| DEFAULT_SOURCE.into());
     let cache = std::env::temp_dir().join(format!("mok-source-{}", std::process::id()));
     let _ = fs::remove_dir_all(&cache);
