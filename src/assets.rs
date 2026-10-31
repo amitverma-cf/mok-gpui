@@ -49,7 +49,7 @@ pub(crate) fn load_fonts(cx: &App) -> Result<()> {
 pub struct Before<T>(T);
 
 impl Assets {
-    /// Serves Mok's files, and every other path from `other`, such as GPUI Kit's `Assets`.
+    /// Serves Mok's files, and every other path from `other`, such as the app's own `AssetSource`.
     pub fn before<T: AssetSource>(other: T) -> Before<T> {
         Before(other)
     }
@@ -93,12 +93,12 @@ mod tests {
 
     const PLEX: &str = "fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf";
 
-    /// Icons alone, and an error for any other path, as GPUI Kit's source answers.
+    /// Icons alone, and an error for any other path, as a library's own source might answer.
     struct IconsOnly;
 
     impl AssetSource for IconsOnly {
         fn load(&self, path: &str) -> Result<Option<Cow<'static, [u8]>>> {
-            if path == "icons/kit-only.svg" {
+            if path == "icons/other-only.svg" {
                 return Ok(Some(Cow::Borrowed(b"<svg/>")));
             }
             match Assets.load(path)? {
@@ -108,7 +108,10 @@ mod tests {
         }
 
         fn list(&self, _: &str) -> Result<Vec<SharedString>> {
-            Ok(vec!["icons/check.svg".into(), "icons/kit-only.svg".into()])
+            Ok(vec![
+                "icons/check.svg".into(),
+                "icons/other-only.svg".into(),
+            ])
         }
     }
 
@@ -133,7 +136,7 @@ mod tests {
         let plex = both.load(PLEX).unwrap().unwrap();
         assert_eq!(plex, Assets.load(PLEX).unwrap().unwrap());
         assert_eq!(
-            &*both.load("icons/kit-only.svg").unwrap().unwrap(),
+            &*both.load("icons/other-only.svg").unwrap().unwrap(),
             b"<svg/>"
         );
         assert!(both.load("icons/neither.svg").is_err());
@@ -143,7 +146,7 @@ mod tests {
             .filter(|name| *name == "icons/check.svg")
             .count();
         assert_eq!(checks, 1);
-        assert!(icons.iter().any(|name| name == "icons/kit-only.svg"));
+        assert!(icons.iter().any(|name| name == "icons/other-only.svg"));
     }
 
     #[test]

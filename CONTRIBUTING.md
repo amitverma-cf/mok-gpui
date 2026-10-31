@@ -4,7 +4,7 @@ Thanks for helping. Bugs, component requests and pull requests are all welcome.
 
 ## Before you start
 
-- Try the component in the gallery (`cargo run --example gallery`) first; it may already do what you need. The upstream project's live site is https://elygpui.com.
+- Try the component in the gallery (`cargo run --example gallery`) first; it may already do what you need.
 - Open an issue from a template (Bug Report, Component Request or Other) before a large change, so we agree on the shape first.
 
 ## Setup

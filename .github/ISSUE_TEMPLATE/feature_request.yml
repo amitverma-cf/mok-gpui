@@ -32,5 +32,5 @@ body:
     attributes:
       label: Checked
       options:
-        - label: I searched the components page at elygpui.com and the open issues.
+        - label: I searched the component list (`cargo mok list`) and the open issues.
           required: true

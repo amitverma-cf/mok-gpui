@@ -8,7 +8,7 @@
 
 ## Add the dependencies
 
-Mok is not on crates.io. Depend on it by git, with GPUI at the snapshot Mok pins. `gpui-pre` republishes Zed's GPUI on crates.io, and GPUI Kit pins the same one:
+Mok is not on crates.io. Depend on it by git, with GPUI at the snapshot Mok pins. `gpui-pre` republishes Zed's GPUI on crates.io:
 
 ```toml
 [dependencies]

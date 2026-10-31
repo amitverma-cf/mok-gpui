@@ -2,7 +2,7 @@
 
 ![Mok GPUI: components for GPUI](frontend/public/og.png)
 
-Mok GPUI began as a fork of [ELY-Open-Source/Ely-GPUI-Components](https://github.com/ELY-Open-Source/Ely-GPUI-Components) (MIT) and is now a separate project with its own crate, CLI and site; it is not affiliated with it. The live site at https://elygpui.com shows upstream's components, not this project's.
+Mok GPUI began as a fork of [Ely GPUI Components](https://github.com/ELY-Open-Source/Ely-GPUI-Components) (MIT) and is now a separate project with its own CLI and site.
 
 A component library for [GPUI](https://www.gpui.rs), the Rust UI framework behind Zed.
 Every component ships in light and dark. The palette is warm and quiet. Color carries meaning, not decoration.
