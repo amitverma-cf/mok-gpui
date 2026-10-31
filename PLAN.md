@@ -231,7 +231,7 @@ Each phase ends in a merged PR and a working `cargo mok add` flow.
 - Fresh-project CI job for each chapter (native + wasm32).
 - Done when: `cargo mok add button` in an empty project fetches over HTTPS and compiles.
 
-**Phase 3: own the foundation (decision 2.2).**
+**Phase 3: own the foundation (decision 2.2).** (3a done: the foundation is copied as units, `cargo mok gen` replaces `build.rs`, `add` no longer adds `mok-gpui`; a fresh project with `button` compiles. Still open: moving `src/` to `registry/`, `frontend/` to `site/`, and `cargo mok remove`.)
 - Move `src/` → `registry/`, copy `base` in `init`, replace `build.rs` with `cargo mok gen theme|assets`.
 - Done when: a new project has no `mok-gpui` dependency and no `build.rs`.
 

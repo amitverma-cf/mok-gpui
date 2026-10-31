@@ -110,7 +110,7 @@ fn rustfmt(path: &Path) {
 fn index(dest: &Path, units: &BTreeSet<String>, chapters: &BTreeSet<String>) -> Result<(), String> {
     let present: BTreeSet<&str> = units
         .iter()
-        .filter_map(|u| u.split('/').next())
+        .filter_map(|u| u.split('/').next().map(|c| c.trim_end_matches(".rs")))
         .filter(|c| chapters.contains(*c))
         .collect();
     let mut out = String::from(
@@ -124,13 +124,22 @@ fn index(dest: &Path, units: &BTreeSet<String>, chapters: &BTreeSet<String>) -> 
             binds.push(*chapter);
         }
     }
-    out.push_str(
-        "\n/// Binds the keys the copied components use.\npub fn init(cx: &mut gpui::App) {\n",
-    );
+    out.push_str("\n/// Loads the fonts and theme, and binds the keys the copied components use.\npub fn init(cx: &mut gpui::App) {\n");
+    if present.contains("assets") {
+        out.push_str(
+            "    assets::load_fonts(cx).expect(\"mok: embedded fonts failed to register\");\n",
+        );
+    }
+    if present.contains("theme") {
+        out.push_str("    theme::Theme::init(cx);\n");
+    }
+    if present.contains("primitives") {
+        out.push_str("    primitives::bind_focus_keys(cx);\n");
+    }
     for chapter in &binds {
         out.push_str(&format!("    {chapter}::bind_keys(cx);\n"));
     }
-    if binds.is_empty() {
+    if binds.is_empty() && !present.contains("theme") && !present.contains("assets") {
         out.push_str("    let _ = cx;\n");
     }
     out.push_str("}\n");
@@ -144,6 +153,7 @@ pub fn render(
     reg: &Registry,
     tree: &Tree,
     all: &BTreeSet<String>,
+    dir: &str,
 ) -> Result<BTreeMap<String, String>, String> {
     let stage = root.join(".mok").join("stage").join("ui");
     let _ = fs::remove_dir_all(&stage);
@@ -156,7 +166,9 @@ pub fn render(
             .find(|(_, m)| m.unit == *unit)
             .map(|(k, _)| k.clone())
             .ok_or_else(|| format!("{unit}: not in the source tree"))?;
-        let out = transform(&text, unit, all, &reg.chapters, tree, &mp)?;
+        let baked = format!("concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/{dir}/gen/");
+        let out = transform(&text, unit, all, &reg.chapters, tree, &mp)?
+            .replace("concat!(env!(\"OUT_DIR\"), \"/", &baked);
         let dest = stage.join(unit);
         fs::create_dir_all(dest.parent().expect("a unit has a folder"))
             .map_err(|e| e.to_string())?;

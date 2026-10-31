@@ -29,7 +29,7 @@ pub use focus::{
     CONTEXT as FOCUS_CONTEXT, Takeover, give_back, hand_back, hold_focus, lent, tab_stop,
     take_focus,
 };
-pub use focus::{FocusNext, FocusPrev, FocusRing, FocusScope};
+pub use focus::{FocusNext, FocusPrev, FocusRing, FocusScope, bind_focus_keys};
 pub use ghost::DragGhost;
 pub use held::hold;
 pub use icon::{EMBEDDED_ICONS, embedded_icon};

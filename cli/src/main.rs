@@ -2,6 +2,11 @@ use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use lock::Lock;
+
+mod bake;
+#[path = "../../build_support/mod.rs"]
+mod build_support;
 mod bundle;
 mod component;
 mod deps;
@@ -29,6 +34,15 @@ fn main() {
         "init" => handle_init(&args[2..]),
         "list" => handle_list(&args[2..]),
         "add" => handle_add(&args[2..]),
+        "gen" | "bake" => {
+            let dir = env::current_dir()
+                .map_err(|e| e.to_string())
+                .and_then(|cwd| bake::run(&cwd, &Lock::read(&cwd, "src/ui").dir));
+            if let Err(e) = dir {
+                eprintln!("[error] {e}");
+                std::process::exit(1);
+            }
+        }
         "update" => handle_update(&args[2..]),
         "doctor" | "check" => handle_doctor(),
         "registry" if args.get(2).map(String::as_str) == Some("build") => {
@@ -153,34 +167,6 @@ fn init(force: bool, assets: bool) -> Result<(), String> {
         fs::write(&config_path, config_template(&sources))
             .map_err(|e| format!("mok-gpui.toml: {e}"))?;
         println!("[ok] Wrote mok-gpui.toml");
-    }
-    let cargo = cwd.join(".cargo").join("config.toml");
-    let existing = fs::read_to_string(&cargo).unwrap_or_default();
-    if existing.contains("MOK_CONFIG_PATH") {
-        println!("[info] .cargo/config.toml already names mok-gpui.toml");
-    } else {
-        let line = "MOK_CONFIG_PATH = { value = \"mok-gpui.toml\", relative = true }";
-        let updated = if existing.contains("[env]") {
-            existing.replacen(
-                "[env]",
-                &format!(
-                    "[env]
-{line}"
-                ),
-                1,
-            )
-        } else {
-            format!(
-                "{existing}
-# Mok bakes fonts, icons and tokens from this file at build time.
-[env]
-{line}
-"
-            )
-        };
-        fs::create_dir_all(cargo.parent().unwrap()).map_err(|e| e.to_string())?;
-        fs::write(&cargo, updated.trim_start()).map_err(|e| format!(".cargo/config.toml: {e}"))?;
-        println!("[ok] .cargo/config.toml points the build at mok-gpui.toml");
     }
     if assets {
         let fonts = fetch::fonts(&cwd.join("assets").join("fonts"))?;

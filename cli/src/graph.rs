@@ -8,16 +8,8 @@ use quote::ToTokens;
 use syn::visit::Visit;
 use syn::{Attribute, Item, UseTree};
 
-/// Modules that stay in the `mok-gpui` crate; everything else is copied as source.
-pub const CORE: &[&str] = &[
-    "assets",
-    "i18n",
-    "layout",
-    "motion",
-    "primitives",
-    "theme",
-    "typography",
-];
+/// Modules `cargo mok add` leaves in a crate. None: the foundation is copied like the rest.
+pub const CORE: &[&str] = &[];
 
 pub type Mp = Vec<String>;
 
@@ -353,6 +345,21 @@ pub fn needs(tree: &Tree, mp: &Mp) -> Needs {
         .collect();
     for item in &body {
         collect.visit_item(item);
+    }
+    // A mod.rs's own `use` lines need nothing, but the code in it may use the names they bring in.
+    for item in &module.ast.items {
+        if let Item::Use(_) = item
+            && module.unit.ends_with("mod.rs")
+            && !is_test_item(item)
+        {
+            let mut aside = Collect {
+                assets: BTreeSet::new(),
+                aliases: BTreeMap::new(),
+                paths: vec![],
+            };
+            aside.visit_item(item);
+            collect.aliases.extend(aside.aliases);
+        }
     }
     let aliases = collect.aliases.clone();
     let mut out = Needs {

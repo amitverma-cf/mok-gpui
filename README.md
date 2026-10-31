@@ -24,13 +24,14 @@ The fonts and icons are not in git. Without the `init` step the build stops and 
 
 ## Use
 
-Mok works like shadcn/ui: the `mok-gpui` crate holds the foundation (theme, motion, primitives, i18n, layout, typography), and `cargo mok` copies each component into your project as source you own. Fonts and icons are not bundled: `init` downloads them into your `assets/`, and the build embeds only what you use.
+Mok works like shadcn/ui: `cargo mok` copies the foundation (theme, motion, primitives, i18n, layout, typography, assets) and each component you ask for into your project as source you own. There is no `mok-gpui` dependency and no `build.rs`: `cargo mok gen` bakes `mok-gpui.toml` (tokens, fonts, icons, media) into plain Rust files under `src/ui/gen`. Fonts and icons are downloaded into your `assets/` by `init`.
 
 ```sh
 cargo install --path cli      # from a clone of this repository: installs `cargo mok`
 cd your-project
-cargo mok init                # mok-gpui.toml, .cargo/config.toml, fonts and Lucide into assets/
+cargo mok init                # mok-gpui.toml, fonts and Lucide into assets/
 cargo mok add button dialog   # source into src/ui, with the crates and files it needs
+cargo mok gen                 # after editing mok-gpui.toml (add also runs it)
 ```
 
 Then add `mod ui;` to your crate and start it:
@@ -38,12 +39,11 @@ Then add `mod ui;` to your crate and start it:
 ```rust
 mod ui;
 
-use mok_gpui::{Assets, theme::{Mode, Theme}};
 use gpui::App;
+use ui::theme::{Mode, Theme};
 
 fn main() {
-    gpui_platform::application().with_assets(Assets).run(|cx: &mut App| {
-        mok_gpui::init(cx).expect("Mok failed to start");
+    gpui_platform::application().with_assets(ui::assets::Assets).run(|cx: &mut App| {
         ui::init(cx);
         Theme::set_mode(Mode::Dark, cx);
     });

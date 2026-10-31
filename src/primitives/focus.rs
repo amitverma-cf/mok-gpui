@@ -11,6 +11,17 @@ actions!(mok, [FocusNext, FocusPrev]);
 /// The key context of every `FocusScope`; Tab and Shift-Tab bind under it.
 pub const CONTEXT: &str = "MokFocus";
 
+/// Binds Tab and Shift-Tab (and F6) under `CONTEXT`.
+pub fn bind_focus_keys(cx: &mut App) {
+    cx.bind_keys([
+        gpui::KeyBinding::new("tab", FocusNext, Some(CONTEXT)),
+        gpui::KeyBinding::new("shift-tab", FocusPrev, Some(CONTEXT)),
+        // Out of a field that keeps Tab, such as a document.
+        gpui::KeyBinding::new("f6", FocusNext, Some(CONTEXT)),
+        gpui::KeyBinding::new("shift-f6", FocusPrev, Some(CONTEXT)),
+    ]);
+}
+
 /// Focus-colored border while focused. Give the element a 1px border.
 pub trait FocusRing: InteractiveElement + Sized {
     fn focus_ring(self, cx: &App) -> Self {

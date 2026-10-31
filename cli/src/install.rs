@@ -19,7 +19,7 @@ pub fn install(root: &Path, units: &[String], opts: &Options) -> Result<(), Stri
     wanted.extend(units.iter().cloned());
     let rows = sync(root, &source, &reg, lock, &wanted, opts, false)?;
     report(&rows, false);
-    println!("\nIn your crate: `mod ui;` then, once after mok_gpui::init, `ui::init(cx);`");
+    println!("\nIn your crate: `mod ui;`, run the app with `.with_assets(ui::assets::Assets)`, and call `ui::init(cx);` once at start");
     Ok(())
 }
 
@@ -33,9 +33,19 @@ pub fn sync(
     opts: &Options,
     dry: bool,
 ) -> Result<Vec<(String, Action)>, String> {
+    let lock_dir = opts.dir.to_string_lossy().replace('\\', "/");
     let tree = Tree::load(&source.join("src"))?;
-    let all = closure(reg, &wanted.iter().cloned().collect::<Vec<_>>())?;
-    let rendered = render(root, source, reg, &tree, &all)?;
+    let mut base = wanted.clone();
+    base.insert("assets.rs".into());
+    let all = closure(reg, &base.iter().cloned().collect::<Vec<_>>())?;
+    let rendered = render(
+        root,
+        source,
+        reg,
+        &tree,
+        &all,
+        &opts.dir.to_string_lossy().replace('\\', "/"),
+    )?;
     let rows = apply(root, &mut lock, &rendered, opts.force, dry)?;
     if !dry {
         lock.source = revision(source);
@@ -43,6 +53,9 @@ pub fn sync(
         lock.write()?;
         add_assets(root, source, reg, &all)?;
         add_crates(root, reg, &all, opts)?;
+        if root.join("mok-gpui.toml").is_file() {
+            crate::bake::run(root, &lock_dir)?;
+        }
     }
     Ok(rows)
 }

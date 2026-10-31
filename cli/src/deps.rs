@@ -7,7 +7,7 @@ use std::process::Command;
 
 use serde_json::Value;
 
-use crate::source::{DEFAULT_SOURCE, Options, Registry};
+use crate::source::{Options, Registry};
 
 /// Keys of the dependencies a project's manifest already names, as code spells them.
 fn present(root: &Path) -> BTreeSet<String> {
@@ -40,27 +40,13 @@ pub fn add_crates(
     root: &Path,
     reg: &Registry,
     units: &BTreeSet<String>,
-    opts: &Options,
+    _opts: &Options,
 ) -> Result<(), String> {
     let mut need: BTreeSet<String> = ["gpui".to_string()].into();
     for unit in units {
         need.extend(reg.crates_of.get(unit).into_iter().flatten().cloned());
     }
     let have = present(root);
-    if !have.contains("mok_gpui") {
-        let mut cmd = Command::new("cargo");
-        cmd.current_dir(root).args(["add", "mok-gpui"]);
-        match &opts.from {
-            Some(path) if path.join("Cargo.toml").is_file() => {
-                cmd.arg("--path")
-                    .arg(fs::canonicalize(path).map_err(|e| e.to_string())?);
-            }
-            _ => {
-                cmd.args(["--git", DEFAULT_SOURCE]);
-            }
-        }
-        run(cmd, "mok-gpui")?;
-    }
     for name in need.iter().filter(|n| !have.contains(*n)) {
         let Some(spec) = reg.specs.get(name) else {
             continue;

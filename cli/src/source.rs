@@ -99,7 +99,8 @@ pub fn load(root: &Path) -> Result<Registry, String> {
     };
     for (id, u) in units {
         if let Some(chapter) = id.split('/').next() {
-            reg.chapters.insert(chapter.to_string());
+            reg.chapters
+                .insert(chapter.trim_end_matches(".rs").to_string());
         }
         reg.crates_of.insert(id.clone(), strings(&u["crates"]));
         let assets = strings(&u["assets"]);
