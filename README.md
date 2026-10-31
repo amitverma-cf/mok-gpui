@@ -99,7 +99,7 @@ cargo mok doctor                # contrast, fonts, packs
 cargo mok registry --check      # in this repo: is registry.json current?
 ```
 
-`add` follows the real `use` graph of the source, rewrites imports (`crate::theme` becomes `mok_gpui::theme`, `crate::forms` becomes `crate::ui::forms`), and records each file's hash in `mok.lock`, so running it again keeps your edits (`--force` replaces them). Some entries are not copyable: they live in the `mok-gpui` crate, belong to another component, or are native to gpui; `add` says which.
+`add` follows the real `use` graph of the source, rewrites imports (`crate::forms` becomes `crate::ui::forms`), and records each file's hash in `mok.lock`, so running it again keeps your edits (`--force` replaces them). Some entries are not copyable: they belong to another component or are native to gpui; `add` says which.
 
 ## Built-in Theme Presets
 
@@ -132,7 +132,7 @@ Theme::set_preset("tokyo-night", cx);
 Icons are referenced through provider-scoped enums rather than loose string paths:
 
 ```rust
-use mok_gpui::primitives::{Icon, LucideIcon};
+use crate::ui::primitives::{Icon, LucideIcon};
 
 Icon::new(LucideIcon::ArrowRight)
 ```
