@@ -13,6 +13,9 @@ pub struct Options {
     pub force: bool,
 }
 
+/// Where CI publishes the bundle (GitHub Pages); `MOK_REGISTRY_URL` overrides it.
+pub const DEFAULT_REGISTRY: &str = "https://amitverma-cf.github.io/mok-gpui/r";
+
 pub const DEFAULT_SOURCE: &str = "https://github.com/amitverma-cf/mok-gpui";
 
 /// Where the library's source is: a given checkout, the current one, or a fresh shallow clone.
@@ -26,6 +29,10 @@ pub fn source_root(from: Option<&Path>) -> Result<PathBuf, String> {
     }
     if let Ok(url) = std::env::var("MOK_REGISTRY_URL") {
         return crate::bundle::fetch(&url);
+    }
+    match crate::bundle::fetch(DEFAULT_REGISTRY) {
+        Ok(dir) => return Ok(dir),
+        Err(e) => println!("[mok] Hosted registry unavailable ({e}); cloning instead"),
     }
     let url = std::env::var("MOK_SOURCE_URL").unwrap_or_else(|_| DEFAULT_SOURCE.into());
     let cache = std::env::temp_dir().join(format!("mok-source-{}", std::process::id()));

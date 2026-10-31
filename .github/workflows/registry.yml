@@ -1,0 +1,29 @@
+name: Registry
+on:
+  push:
+    branches: [main]
+    paths: [src/**, cli/**, registry.json, assets/**, .github/workflows/registry.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - run: cargo run --release --manifest-path cli/Cargo.toml -- registry build _site/r
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4
