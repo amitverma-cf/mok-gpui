@@ -1,13 +1,13 @@
 # Mok GPUI (`mok-gpui`)
 
-![Mok GPUI: components for GPUI](frontend/public/og.png)
+![Mok GPUI: components for GPUI](site/public/og.png)
 
 Mok GPUI began as a fork of [Ely GPUI Components](https://github.com/ELY-Open-Source/Ely-GPUI-Components) (MIT) and is now a separate project with its own CLI and site.
 
 A component library for [GPUI](https://www.gpui.rs), the Rust UI framework behind Zed.
 Every component ships in light and dark. The palette is warm and quiet. Color carries meaning, not decoration.
 
-Every component runs in the native gallery (`cargo run --example gallery`), and `frontend/` is a website that browses all of them with a real capture of each.
+Every component runs in the native gallery (`cargo run --example gallery`), and `site/` is a website that browses all of them with a real capture of each.
 
 Status: early. `TASKS.md` tracks every component, chapter by chapter. To help, see `CONTRIBUTING.md`.
 

@@ -16,6 +16,9 @@ pub struct Options {
 /// Where CI publishes the bundle (GitHub Pages); `MOK_REGISTRY_URL` overrides it.
 pub const DEFAULT_REGISTRY: &str = "https://amitverma-cf.github.io/mok-gpui/r";
 
+/// The folder of the library source in a checkout.
+pub const LIB_DIR: &str = "registry";
+
 pub const DEFAULT_SOURCE: &str = "https://github.com/amitverma-cf/mok-gpui";
 
 /// Where the library's source is: a given checkout, the current one, or a fresh shallow clone.
@@ -24,7 +27,7 @@ pub fn source_root(from: Option<&Path>) -> Result<PathBuf, String> {
         return Ok(dir.to_path_buf());
     }
     let here = Path::new(".");
-    if here.join("registry.json").is_file() && here.join("src/lib.rs").is_file() {
+    if here.join("registry.json").is_file() && here.join(LIB_DIR).join("lib.rs").is_file() {
         return Ok(here.to_path_buf());
     }
     if let Ok(url) = std::env::var("MOK_REGISTRY_URL") {

@@ -158,7 +158,7 @@ pub fn render(
     let stage = root.join(".mok").join("stage").join("ui");
     let _ = fs::remove_dir_all(&stage);
     for unit in all {
-        let text = fs::read_to_string(source.join("src").join(unit))
+        let text = fs::read_to_string(source.join(crate::source::LIB_DIR).join(unit))
             .map_err(|e| format!("{unit}: {e}"))?;
         let mp = tree
             .mods

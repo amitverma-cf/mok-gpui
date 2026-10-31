@@ -1,6 +1,6 @@
 /target
 node_modules/
-/frontend/dist/
+/site/dist/
 .DS_Store
 /docs/
 /cli/target/

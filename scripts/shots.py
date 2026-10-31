@@ -1,4 +1,4 @@
-"""Writes frontend/public/shots: native captures a browser cannot make."""
+"""Writes site/public/shots: native captures a browser cannot make."""
 
 import json
 import subprocess
@@ -9,7 +9,7 @@ from pathlib import Path
 from PIL import Image, ImageChops
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "frontend/public/shots"
+OUT = ROOT / "site/public/shots"
 GROUND = {"light": (252, 250, 247, 255), "dark": (19, 17, 16, 255)}
 
 # Stories shown as a capture: their demo needs the desktop.
@@ -88,7 +88,7 @@ def main():
             for name in (n for key, names in WINDOWS.items() if key.startswith(page + "/") for n in names):
                 for mode in ("light", "dark"):
                     save(grounded(into / f"{name}-{mode}.png", mode), f"{name}-{mode}")
-    (ROOT / "frontend/src/shots.json").write_text(json.dumps(manifest, indent=1) + "\n")
+    (ROOT / "site/src/shots.json").write_text(json.dumps(manifest, indent=1) + "\n")
 
 
 main()

@@ -24,7 +24,7 @@ cargo run --example gallery -- --page forms
 - A component lives in `src/<chapter>/`, one folder per chapter. One component, one home; anything that duplicates another points to it.
 - Its demo is a story on the chapter's page, `examples/gallery/pages/<chapter>.rs`. After adding or renaming a story, run `python3 scripts/stories.py`.
 - `TASKS.md` and `tasks/` track every component; tick its line when it lands.
-- The website is `frontend/`; its README section has the commands.
+- The website is `site/`; its README section has the commands.
 
 ## House rules
 

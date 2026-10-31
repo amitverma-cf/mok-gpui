@@ -40,4 +40,4 @@ Title: start with the type, for example
 - [ ] Keyboard works: Tab reaches it, focus ring shows, Enter and Space press it
 - [ ] Reduced motion holds its motion still
 - [ ] `AGENTS.md` names any new rule or dependency
-- [ ] For `frontend/`: `pnpm test`, `pnpm build` and `pnpm e2e` pass
+- [ ] For `site/`: `pnpm test`, `pnpm build` and `pnpm e2e` pass

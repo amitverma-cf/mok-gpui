@@ -8,6 +8,9 @@ description = "A restrained component library for GPUI, in light and dark."
 repository = "https://github.com/amitverma-cf/mok-gpui"
 publish = false
 
+[lib]
+path = "registry/lib.rs"
+
 [features]
 default = ["runtime_shaders"]
 runtime_shaders = ["gpui_platform/runtime_shaders"]

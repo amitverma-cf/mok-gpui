@@ -2,7 +2,7 @@ name: Registry
 on:
   push:
     branches: [main]
-    paths: [src/**, cli/**, registry.json, assets/**, .github/workflows/registry.yml]
+    paths: [registry/**, cli/**, registry.json, assets/**, .github/workflows/registry.yml]
   workflow_dispatch:
 permissions:
   contents: read

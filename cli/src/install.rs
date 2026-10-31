@@ -6,7 +6,7 @@ use std::path::Path;
 use crate::deps::{add_assets, add_crates};
 use crate::graph::Tree;
 use crate::lock::Lock;
-use crate::source::{Options, Registry, closure, load, revision, source_root};
+use crate::source::{LIB_DIR, Options, Registry, closure, load, revision, source_root};
 use crate::sync::{Action, apply, render};
 
 /// `cargo mok add`: the named units, with what they need, joining what is already copied.
@@ -19,7 +19,9 @@ pub fn install(root: &Path, units: &[String], opts: &Options) -> Result<(), Stri
     wanted.extend(units.iter().cloned());
     let rows = sync(root, &source, &reg, lock, &wanted, opts, false)?;
     report(&rows, false);
-    println!("\nIn your crate: `mod ui;`, run the app with `.with_assets(ui::assets::Assets)`, and call `ui::init(cx);` once at start");
+    println!(
+        "\nIn your crate: `mod ui;`, run the app with `.with_assets(ui::assets::Assets)`, and call `ui::init(cx);` once at start"
+    );
     Ok(())
 }
 
@@ -34,7 +36,7 @@ pub fn sync(
     dry: bool,
 ) -> Result<Vec<(String, Action)>, String> {
     let lock_dir = opts.dir.to_string_lossy().replace('\\', "/");
-    let tree = Tree::load(&source.join("src"))?;
+    let tree = Tree::load(&source.join(LIB_DIR))?;
     let mut base = wanted.clone();
     base.insert("assets.rs".into());
     let all = closure(reg, &base.iter().cloned().collect::<Vec<_>>())?;

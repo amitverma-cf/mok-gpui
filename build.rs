@@ -102,13 +102,13 @@ fn main() {
         .paths
         .as_ref()
         .and_then(|p| p.scan_sources.clone())
-        .unwrap_or_else(|| vec!["src".into(), "examples".into()]);
+        .unwrap_or_else(|| vec!["registry".into(), "examples".into()]);
     // The modules that stay in this crate draw icons of their own, whatever the project uses.
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("cargo sets it"));
     for core in CORE_MODULES {
         scan_sources.push(
             manifest_dir
-                .join("src")
+                .join("registry")
                 .join(core)
                 .to_string_lossy()
                 .into_owned(),

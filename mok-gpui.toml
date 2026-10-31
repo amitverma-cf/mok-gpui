@@ -1,7 +1,7 @@
 [paths]
 assets_dir = "assets"
 icons_dir = "assets/icons"
-scan_sources = ["src/**/*.rs", "examples/**/*.rs"]
+scan_sources = ["registry/**/*.rs", "examples/**/*.rs"]
 
 [theme]
 default_mode = "system"

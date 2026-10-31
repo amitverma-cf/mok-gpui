@@ -149,7 +149,7 @@ impl Context<'_> {
             "chapter": page["number"],
             "chapter_title": page["title"],
             "category": page["slug"],
-            "source_dir": format!("src/{dir}"),
+            "source_dir": format!("{}/{dir}", crate::source::LIB_DIR),
             "file": file,
             "export_type": found.map_or_else(|| key_ident(display), |f| f.ident.clone()),
             "description": desc,
@@ -185,7 +185,7 @@ impl Context<'_> {
 
 /// Writes `registry.json`; with `check`, only says whether it is current.
 pub fn generate(repo: &Path, check: bool) -> Result<(), String> {
-    let tree = Tree::load(&repo.join("src"))?;
+    let tree = Tree::load(&repo.join(crate::source::LIB_DIR))?;
     let deps = dependencies(repo)?;
     let units = file_graph(&tree, &deps);
     let cx = Context {
@@ -328,7 +328,7 @@ pub fn generate(repo: &Path, check: bool) -> Result<(), String> {
             "name": slug,
             "title": page["title"],
             "summary": page["summary"],
-            "source_dir": format!("src/{chapter}"),
+            "source_dir": format!("{}/{chapter}", crate::source::LIB_DIR),
             "component_count": names.len(),
             "components": names,
         }));

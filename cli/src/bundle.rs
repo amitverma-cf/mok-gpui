@@ -10,7 +10,7 @@ use flate2::write::GzEncoder;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
-use crate::source::revision;
+use crate::source::{LIB_DIR, revision};
 
 fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
@@ -39,7 +39,7 @@ pub fn build(repo: &Path, out: &Path) -> Result<(), String> {
     let text = fs::read_to_string(&registry).map_err(|e| format!("{}: {e}", registry.display()))?;
     let value: Value = serde_json::from_str(&text).map_err(|e| e.to_string())?;
     let mut files = vec![PathBuf::from("registry.json")];
-    for dir in ["src", "assets"] {
+    for dir in [LIB_DIR, "assets"] {
         walk(repo, &repo.join(dir), &mut files)?;
     }
     // Fonts and icons come from their pinned downloads, not from the bundle.
