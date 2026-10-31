@@ -19,7 +19,7 @@ body:
         - Native gallery, macOS
         - Native gallery, Windows
         - Native gallery, Linux
-        - Live example on elygpui.com
+        - The website's live gallery
         - My own app
     validations:
       required: true

@@ -2,8 +2,6 @@
 node_modules/
 /frontend/dist/
 .DS_Store
-/compat/kit/Cargo.lock
-/compat/kit/target/
 /docs/
 /cli/target/
 

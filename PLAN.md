@@ -1,6 +1,6 @@
 # Plan: mok-gpui as a shadcn-style toolkit for GPUI apps
 
-Status: proposal for review. Nothing in this plan is implemented yet; this PR adds only this file.
+Status: approved by Amit (section 10). Phase 1 (cleanup) is implemented in this PR; the rest is not.
 
 ## 1. Where the repo is today
 
@@ -141,7 +141,7 @@ Tracked in `mok.toml` as `[targets.<name>]`. `cargo mok build --target x` expand
 | macOS, Windows, Linux | Native; gallery runs; no packaging | `build`/`run` are thin wrappers over cargo. `package`: macOS `.app` + `.dmg`, Windows `.msi`/zip (cargo-packager or cargo-wix), Linux AppImage + `.deb`. Evaluate `cargo-packager` first rather than writing installers. Shader note: gpui compiles shaders at runtime, so no Xcode is required. |
 | Web (wasm) | Works via `scripts/web.sh`; 20 MB wasm | Port `web.sh`/`web.ps1` into `build --target web`: pins/checks the `wasm-bindgen` CLI at the `Cargo.lock` version, runs `wasm-opt`, emits `index.html`, reports size, `RUSTC_BOOTSTRAP` workaround kept and documented. Add `run --target web` serving locally. Asset URLs via `MOK_GALLERY_ASSETS`-style config. |
 | iOS, Android | None | Build on [gpui-mobile](https://github.com/itsbalamurali/gpui-mobile) (wgpu, Metal/Vulkan, uses cargo-ndk, xcodegen, Gradle). Needs a spike: it does not state which gpui version it pins, so version compatibility with `gpui-pre =0.3.9` is unknown. Experimental flag until proven. |
-| react-native-gpui | None | **Needs your input** (question 1). The awesome-gpui entry "React Native GPUI" links to `nucleus-os/nucleus`, which is a Swift/Skia platform (GPL-3.0, macOS+Xcode host) and does not obviously use GPUI, so I could not tell what it is. |
+| react-native-gpui | None | **Dropped (decided 2026-10-31).** GPUI draws its own GPU surface through its platform layer; there is no JS bridge, and embedding that surface inside a React Native Fabric view would mean writing a new GPUI platform plus a native view manager per OS, on top of the still-unproven gpui-mobile. The awesome-gpui entry links to a Swift/GPL project that does not use GPUI. Revisit only after iOS/Android work. |
 | Terminal / embedded | None | Out of scope for v1. [Crepuscularity](https://github.com/tschk/crepuscularity) shows the multi-target idea (`crepus.toml`, `crepus build`) but renders its own IR, which does not fit Mok's source-copy model. |
 
 Per-item `targets` in the registry (section 2.3) lets `add` warn "this component uses a terminal/webview and is native only". Some of this exists as `ui::native_only` in the gallery.
@@ -219,7 +219,7 @@ Two rules for borrowing: record source and licence in the item's registry entry 
 
 Each phase ends in a merged PR and a working `cargo mok add` flow.
 
-**Phase 0: approval (this PR).** Answer the questions below.
+**Phase 0: approval.** Done.
 
 **Phase 1: clean up (small, low risk).**
 - Remove gpui-kit and Ely leftovers (section 5), including `Assets::before`.
@@ -256,10 +256,12 @@ Each phase ends in a merged PR and a working `cargo mok add` flow.
 - **Licence.** Anything ported from awesome-gpui needs a licence check (Apache-2.0 needs a notice, GPL such as the nucleus repository cannot be copied into an MIT registry).
 - **Naming.** Check that `cargo-mok` and `mok` are free on crates.io before the first publish.
 
-## 10. Questions for you
+## 10. Decisions (Amit, 2026-10-31)
 
-1. **react-native-gpui:** what do you mean exactly? Options: (a) GPUI as the renderer behind a React Native desktop host, (b) React Native-style JS/TS bindings that drive GPUI (like GPUIX), (c) the nucleus project. My default: leave it out of the first release and design the `targets` interface so it can be added.
-2. **Copy the foundation too (2.2 option B)?** My default: yes.
-3. **OK to move `src/` to `registry/` and `frontend/` to `site/`?** My default: yes, as one isolated commit after the cleanup.
-4. **Keep `gpui-pre`** as the pinned source (2.4)? My default: yes.
-5. **Mobile:** is iOS/Android needed for the first usable release, or can it follow desktop and web? My default: follow.
+1. react-native-gpui: dropped for now (section 4).
+2. The foundation is copied into projects (2.2, option B): yes.
+3. `src/` moves to `registry/` and `frontend/` to `site/`: yes, in one isolated commit.
+4. Keep `gpui-pre` as the pinned source: yes.
+5. Mobile follows desktop and web.
+
+Phase 1 (cleanup) is done in this PR; later phases need their own PRs.

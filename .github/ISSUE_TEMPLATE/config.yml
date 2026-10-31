@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Components, live
-    url: https://elygpui.com/components/
-    about: Every component runs in the browser; try it before you file.
+  - name: Component gallery
+    url: https://github.com/amitverma-cf/mok-gpui#run-the-gallery
+    about: Every component runs in the native gallery; try it before you file.
