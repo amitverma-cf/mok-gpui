@@ -1,0 +1,26 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - { os: ubuntu-latest, name: linux-x86_64, bin: cargo-mok }
+          - { os: macos-latest, name: macos-arm64, bin: cargo-mok }
+          - { os: windows-latest, name: windows-x86_64, bin: cargo-mok.exe }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo build --release --manifest-path cli/Cargo.toml
+      - shell: bash
+        run: |
+          mkdir dist
+          cp "cli/target/release/${{ matrix.bin }}" dist/
+          tar czf "cargo-mok-${{ matrix.name }}.tar.gz" -C dist "${{ matrix.bin }}"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: cargo-mok-${{ matrix.name }}.tar.gz

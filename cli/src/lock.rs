@@ -11,6 +11,8 @@ pub struct Lock {
     pub dir: String,
     /// The source commit the files were last made from, when known.
     pub source: String,
+    /// The units asked for by name; the rest of `files` is what they need.
+    pub requested: BTreeSet<String>,
     /// Project path of a copied file, to the unit it came from.
     pub files: BTreeMap<String, String>,
 }
@@ -23,6 +25,7 @@ impl Lock {
             root: root.to_path_buf(),
             dir: dir.to_string(),
             source: String::new(),
+            requested: BTreeSet::new(),
             files: BTreeMap::new(),
         };
         if let Ok(text) = fs::read_to_string(&lock.path)
@@ -36,6 +39,13 @@ impl Lock {
                 lock.dir = saved;
             }
             lock.source = get(&value, "source");
+            lock.requested = value
+                .get("requested")
+                .and_then(|r| r.as_array())
+                .into_iter()
+                .flatten()
+                .filter_map(|v| v.as_str().map(String::from))
+                .collect();
             for f in value
                 .get("file")
                 .and_then(|f| f.as_array())
@@ -60,6 +70,8 @@ impl Lock {
             "dir = {:?}\nsource = {:?}\n",
             self.dir, self.source
         ));
+        let listed: Vec<&String> = self.requested.iter().collect();
+        out.push_str(&format!("requested = {listed:?}\n"));
         for (path, unit) in &self.files {
             out.push_str(&format!("\n[[file]]\npath = {path:?}\nunit = {unit:?}\n"));
         }

@@ -17,6 +17,7 @@ mod install;
 mod items;
 mod lock;
 mod notes;
+mod project;
 mod registry;
 mod rewrite;
 mod source;
@@ -43,8 +44,35 @@ fn main() {
                 std::process::exit(1);
             }
         }
+        "remove" | "rm" => handle_remove(&args[2..], false),
+        "diff" => handle_remove(&args[2..], true),
         "update" => handle_update(&args[2..]),
-        "doctor" | "check" => handle_doctor(),
+        "doctor" => handle_doctor(),
+        "check" => {
+            handle_doctor();
+            exit_on(project::check(&cwd()));
+        }
+        "new" => {
+            let mut name = None;
+            let mut opts = source::Options {
+                from: None,
+                dir: PathBuf::from("src/ui"),
+                force: false,
+            };
+            let mut it = args[2..].iter();
+            while let Some(a) = it.next() {
+                match a.as_str() {
+                    "--from" => opts.from = it.next().map(PathBuf::from),
+                    other => name = Some(other.to_string()),
+                }
+            }
+            let Some(name) = name else {
+                eprintln!("Usage: cargo mok new <name> [--from <checkout>]");
+                std::process::exit(1);
+            };
+            exit_on(project::new(&cwd(), &name, &opts));
+        }
+        "build" | "run" | "package" => exit_on(project::target(&cwd(), command, &args[2..])),
         "registry" if args.get(2).map(String::as_str) == Some("build") => {
             let out = args
                 .get(3)
@@ -77,15 +105,33 @@ fn main() {
     }
 }
 
+fn cwd() -> PathBuf {
+    env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
+}
+
+fn exit_on(result: Result<(), String>) {
+    if let Err(e) = result {
+        eprintln!("[error] {e}");
+        std::process::exit(1);
+    }
+}
+
 fn print_help() {
     println!("Mok GPUI Component CLI\n");
     println!("Usage:");
     println!("  cargo mok <command> [options]\n");
     println!("Commands:");
+    println!("  new <name>               Start an app that runs natively and in the browser");
+    println!("  build|run|package [--target native|web] [--release]");
+    println!("  check                    doctor, then cargo fmt --check and cargo check");
     println!("  init                     Initialize mok-gpui.toml and project asset structure");
     println!("  list [--json]            List all available components in the registry");
     println!("  add icons <pack>         Add an icon pack (lucide, heroicons, hugeicons)");
     println!("  add <component>          Copy a component and what it needs into src/ui");
+    println!(
+        "  remove <component>       Remove a component and what only it needed (edited files stay)"
+    );
+    println!("  diff                     Show how your copies differ from the source");
     println!("  update [--dry-run]       Bring copied components up to date, keeping your edits");
     println!(
         "  registry build [dir]     Write index.json and source.tar.gz for hosting (maintainers)"
@@ -224,6 +270,10 @@ minify = true
 [media.videos]
 
 [media.files]
+
+# Other registries, added with `cargo mok add @name/component`:
+# [registries]
+# acme = "https://acme.dev/r"
 "#
     )
 }
@@ -305,6 +355,33 @@ fn add_icons(pack: &str) -> Result<(), String> {
     Ok(())
 }
 
+fn handle_remove(args: &[String], diff: bool) {
+    let mut opts = source::Options {
+        from: None,
+        dir: PathBuf::from("src/ui"),
+        force: false,
+    };
+    let mut names = vec![];
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        match a.as_str() {
+            "--from" => opts.from = it.next().map(PathBuf::from),
+            "--dir" => opts.dir = it.next().map(PathBuf::from).unwrap_or(opts.dir),
+            other => names.push(other.to_string()),
+        }
+    }
+    let cwd = env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+    let result = if diff {
+        install::diff(&cwd, &opts)
+    } else {
+        component::remove_components(&names, &cwd, &opts)
+    };
+    if let Err(e) = result {
+        eprintln!("[error] {e}");
+        std::process::exit(1);
+    }
+}
+
 fn handle_update(args: &[String]) {
     let mut opts = source::Options {
         from: None,
@@ -350,7 +427,7 @@ fn handle_add_component(args: &[String]) {
         }
     }
     let cwd = env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-    if let Err(e) = component::scaffold_components(&names, &cwd, &opts) {
+    if let Err(e) = component::add_from_registries(&names, &cwd, &opts) {
         eprintln!("[error] {e}");
         std::process::exit(1);
     }

@@ -32,6 +32,14 @@ cd your-project
 cargo mok init                # mok-gpui.toml, fonts and Lucide into assets/
 cargo mok add button dialog   # source into src/ui, with the crates and files it needs
 cargo mok gen                 # after editing mok-gpui.toml (add also runs it)
+cargo mok remove dialog       # and whatever only it needed; edited files stay
+cargo mok diff                # your copies against the source
+cargo mok update              # new source, your edits kept (three-way merge)
+cargo mok new my-app          # a fresh app, native and web, with Mok wired in
+cargo mok build --target web  # wasm + wasm-bindgen + wasm-opt into dist/web
+cargo mok run --target web    # the same, then serves it on :8080
+cargo mok package             # installers through cargo-packager
+cargo mok add @acme/widget    # from a registry listed under [registries] in mok-gpui.toml
 ```
 
 Then add `mod ui;` to your crate and start it:

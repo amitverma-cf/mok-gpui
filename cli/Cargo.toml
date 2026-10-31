@@ -11,6 +11,9 @@ description = "Adds Mok GPUI components, icons and fonts to your project as sour
 name = "cargo-mok"
 path = "src/main.rs"
 
+[package.metadata.binstall]
+pkg-url = "https://github.com/amitverma-cf/mok-gpui/releases/download/v{ version }/cargo-mok-{ target }.tar.gz"
+
 [dependencies]
 flate2 = "1"
 image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }

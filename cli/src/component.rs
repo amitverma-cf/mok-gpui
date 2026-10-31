@@ -171,6 +171,53 @@ fn find<'a>(registry: &'a Registry, name: &str) -> Option<&'a RegistryComponent>
     })
 }
 
+/// `add` with `@namespace/name` entries served by the registries `mok-gpui.toml` lists under `[registries]`.
+pub fn add_from_registries(
+    names: &[String],
+    project_root: &Path,
+    opts: &crate::source::Options,
+) -> Result<(), String> {
+    let (spaced, plain): (Vec<&String>, Vec<&String>) =
+        names.iter().partition(|n| n.starts_with('@'));
+    if !plain.is_empty() {
+        let plain: Vec<String> = plain.into_iter().cloned().collect();
+        scaffold_components(&plain, project_root, opts)?;
+    }
+    if spaced.is_empty() {
+        return Ok(());
+    }
+    let config = std::fs::read_to_string(project_root.join("mok-gpui.toml"))
+        .map_err(|_| "mok-gpui.toml not found; run `cargo mok init` first".to_string())?;
+    let config: toml::Value = config.parse().map_err(|e: toml::de::Error| e.to_string())?;
+    let mut by_space: std::collections::BTreeMap<String, Vec<String>> = Default::default();
+    for name in spaced {
+        let (space, item) = name[1..]
+            .split_once('/')
+            .ok_or_else(|| format!("{name}: write @namespace/component"))?;
+        by_space
+            .entry(space.to_string())
+            .or_default()
+            .push(item.to_string());
+    }
+    for (space, items) in by_space {
+        let url = config
+            .get("registries")
+            .and_then(|r| r.get(&space))
+            .and_then(|u| u.as_str())
+            .ok_or_else(|| {
+                format!("no registry @{space}: add `{space} = \"<url>\"` under [registries] in mok-gpui.toml")
+            })?;
+        let dir = crate::bundle::fetch(url)?;
+        let opts = crate::source::Options {
+            from: Some(dir),
+            dir: opts.dir.clone(),
+            force: opts.force,
+        };
+        scaffold_components(&items, project_root, &opts)?;
+    }
+    Ok(())
+}
+
 /// Copies each named component, with what it needs, into the project.
 pub fn scaffold_components(
     names: &[String],
@@ -222,6 +269,32 @@ pub fn scaffold_components(
     crate::install::install(project_root, &units, &opts)?;
     println!("Import from `crate::ui::...`; the code is yours to edit.");
     Ok(())
+}
+
+/// `cargo mok remove`: names to units, then the removal.
+pub fn remove_components(
+    names: &[String],
+    project_root: &Path,
+    opts: &crate::source::Options,
+) -> Result<(), String> {
+    let source = crate::source::source_root(opts.from.as_deref())?;
+    let registry = load_registry(Some(&source))?;
+    let mut units = vec![];
+    for name in names {
+        let entry = find(&registry, name).ok_or_else(|| format!("Unknown component '{name}'."))?;
+        units.push(
+            entry
+                .unit
+                .clone()
+                .ok_or_else(|| format!("'{name}' has no files"))?,
+        );
+    }
+    let opts = crate::source::Options {
+        from: Some(source),
+        dir: opts.dir.clone(),
+        force: false,
+    };
+    crate::install::remove(project_root, &units, &opts)
 }
 
 #[cfg(test)]

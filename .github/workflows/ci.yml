@@ -1,0 +1,22 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo fmt --manifest-path cli/Cargo.toml --check
+      - run: cargo clippy --manifest-path cli/Cargo.toml --all-targets -- -D warnings
+      - run: cargo test --manifest-path cli/Cargo.toml
+      - run: cargo run --manifest-path cli/Cargo.toml -- registry . --check
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - run: scripts/smoke.sh

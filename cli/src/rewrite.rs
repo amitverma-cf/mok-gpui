@@ -165,6 +165,12 @@ pub fn transform(
     tree: &Tree,
     mp: &Mp,
 ) -> Result<String, String> {
+    // The crate root re-exports the asset types; the copy keeps them in `assets`.
+    let rooted = regex::Regex::new(r"\bcrate::(Assets|Before|ImageAsset|VideoAsset)\b")
+        .expect("a fixed pattern")
+        .replace_all(text, "crate::assets::$1")
+        .into_owned();
+    let text = rooted.as_str();
     let ast = syn::parse_file(text).map_err(|e| format!("{unit}: {e}"))?;
     let starts = line_starts(text);
     let mut edits: Vec<Edit> = vec![];

@@ -265,3 +265,15 @@ Each phase ends in a merged PR and a working `cargo mok add` flow.
 5. Mobile follows desktop and web.
 
 Phase 1 (cleanup) is done in this PR; later phases need their own PRs.
+
+## 11. Status (2026-10-31)
+
+Done on `main`: phases 1 to 3, the `registry/` and `site/` move, `remove`, `diff`, `new`, `build|run|package --target native|web`, `check`, `@namespace/` registries, `scripts/smoke.sh` (a fresh app plus one component from each of the 44 chapters compiles) and the CI and release workflows. A `new` app runs in headless Chromium (WebGL2).
+
+Not done, on purpose:
+- Per-item `r/*.json`: the hosted bundle is one checksummed tarball of the same source tree; third-party registries use the same format. Revisit if bundle size hurts.
+- iOS and Android: after desktop and web, as decided. react-native-gpui: dropped.
+- awesome-gpui ports: each needs a licence and gpui-version check before copying. None was vendored; add them as registry items one at a time.
+- `countries.py`, `captcha.py`, `tiles.py`, `shots.py`: maintainer-only generators for this repo's own assets; they stay as scripts. `icons.sh` is superseded by `cargo mok add icons lucide`.
+- `scripts/web.sh` still builds the gallery, which needs `MOK_GALLERY_ASSETS`; apps use `cargo mok build --target web`.
+- The Pages and release workflows have not run yet; Pages must be set to "GitHub Actions" in the repo settings.
